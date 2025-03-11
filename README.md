@@ -18,22 +18,33 @@ A Python-based time tracking system that uses RFID cards to track time spent on 
 - SQLite3
 - pyserial (for RFID reader communication)
 - RFID Reader (connected via USB)
-- Web browser
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone [repo-url]
+git clone https://github.com/Abengs84/project-timer.git
 cd project-timer
 ```
 
-2. Install required Python packages:
+2. Create and activate a virtual environment:
 ```bash
-pip install flask pyserial
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On Linux/Mac:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
 ```
 
-3. Initialize the database:
+3. Install required Python packages:
+```bash
+pip install -r requirements.txt
+```
+
+4. Initialize the database:
 ```bash
 python web_interface.py
 ```
