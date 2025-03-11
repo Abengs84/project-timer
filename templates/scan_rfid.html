@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan RFID - Project Time Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h1 class="mb-4">Project Time Tracker</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Scan RFID Tag</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-3">Project Name: <strong>{{ project_name }}</strong></h6>
+                
+                <div id="scanning-status" class="alert alert-info">
+                    Please click "Start Scanning" and scan your RFID tag
+                </div>
+
+                <button id="start-scan" class="btn btn-primary">Start Scanning</button>
+                
+                <form id="complete-form" action="{{ url_for('complete_project') }}" method="post" style="display: none;">
+                    <input type="hidden" name="name" value="{{ project_name }}">
+                    <input type="hidden" name="tag_id" id="tag-id">
+                    <button type="submit" class="btn btn-success">Complete Project Setup</button>
+                </form>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-secondary mt-2">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('start-scan').addEventListener('click', function() {
+            const statusDiv = document.getElementById('scanning-status');
+            const completeForm = document.getElementById('complete-form');
+            const tagIdInput = document.getElementById('tag-id');
+            
+            // Start scanning
+            fetch('/start_rfid_scan', {
+                method: 'POST'
+            }).then(response => response.json())
+              .then(data => {
+                  statusDiv.className = 'alert alert-info';
+                  statusDiv.textContent = 'Scanning for RFID tag...';
+                  
+                  // Start polling for results
+                  const checkInterval = setInterval(function() {
+                      fetch('/check_rfid_scan')
+                          .then(response => response.json())
+                          .then(data => {
+                              if (data.status === 'success') {
+                                  clearInterval(checkInterval);
+                                  statusDiv.className = 'alert alert-success';
+                                  statusDiv.textContent = 'RFID tag scanned successfully!';
+                                  tagIdInput.value = data.tag_id;
+                                  completeForm.style.display = 'block';
+                              }
+                          })
+                          .catch(error => {
+                              clearInterval(checkInterval);
+                              statusDiv.className = 'alert alert-danger';
+                              statusDiv.textContent = 'Error scanning RFID tag. Please try again.';
+                          });
+                  }, 1000);
+              });
+        });
+    </script>
+</body>
+</html> 
